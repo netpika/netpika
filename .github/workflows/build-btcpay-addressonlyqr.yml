@@ -1,0 +1,52 @@
+name: Build BTCPay AddressOnlyQR
+
+on:
+  pull_request:
+    paths:
+      - 'tools/btcpay-addressonlyqr/**'
+      - '.github/workflows/build-btcpay-addressonlyqr.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout netPika repo
+        uses: actions/checkout@v4
+
+      - name: Checkout BTCPay Server 2.4.3
+        uses: actions/checkout@v4
+        with:
+          repository: btcpayserver/btcpayserver
+          ref: v2.4.3
+          path: tools/btcpay-addressonlyqr/submodules/btcpayserver
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build plugin
+        run: |
+          dotnet publish tools/btcpay-addressonlyqr/src/NetPika.AddressOnlyQR/NetPika.AddressOnlyQR.csproj \
+            -c Release \
+            -o tools/btcpay-addressonlyqr/out
+
+      - name: Verify assembly
+        run: |
+          test -f tools/btcpay-addressonlyqr/out/NetPika.AddressOnlyQR.dll
+          ls -lah tools/btcpay-addressonlyqr/out
+
+      - name: Package .btcpay
+        run: |
+          cd tools/btcpay-addressonlyqr/out
+          zip -9 -r ../NetPika.AddressOnlyQR.btcpay .
+          cd -
+          unzip -l tools/btcpay-addressonlyqr/NetPika.AddressOnlyQR.btcpay
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetPika.AddressOnlyQR
+          path: tools/btcpay-addressonlyqr/NetPika.AddressOnlyQR.btcpay
+          if-no-files-found: error

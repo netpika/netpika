@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Product>netPika Address-Only QR</Product>
+    <Description>Shows only the BTC/LTC destination address in BTCPay checkout QR codes while preserving the full payment URI for the Pay in Wallet action.</Description>
+    <Version>1.0.0</Version>
+    <AssemblyName>NetPika.AddressOnlyQR</AssemblyName>
+    <RootNamespace>NetPika.AddressOnlyQR</RootNamespace>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ProjectReference>
+      <Properties>StaticWebAssetsEnabled=false</Properties>
+      <Private>false</Private>
+      <ExcludeAssets>runtime;native;build;buildTransitive;contentFiles</ExcludeAssets>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\submodules\btcpayserver\BTCPayServer\BTCPayServer.csproj" />
+  </ItemGroup>
+</Project>
