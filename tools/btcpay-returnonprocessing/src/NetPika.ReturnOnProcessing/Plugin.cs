@@ -1,3 +1,4 @@
+using BTCPayServer;
 using BTCPayServer.Abstractions.Contracts;
 using BTCPayServer.Abstractions.Models;
 using Microsoft.Extensions.DependencyInjection;
