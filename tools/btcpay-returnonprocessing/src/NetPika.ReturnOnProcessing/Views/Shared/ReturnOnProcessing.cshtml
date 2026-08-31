@@ -1,0 +1,54 @@
+@using System
+@using System.Text.Json
+@using BTCPayServer.Models.InvoicingModels
+@model CheckoutModel
+@{
+    const string NetPikaStoreId = "BrMP1be9ai4bspSdLG8wEaQZ9Z12zb4XTVmk1TVY2XiC";
+
+    string? target = null;
+    if (string.Equals(Model.StoreId, NetPikaStoreId, StringComparison.Ordinal) &&
+        Uri.TryCreate(Model.MerchantRefLink, UriKind.Absolute, out var uri) &&
+        string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(uri.Host, "netpika.com", StringComparison.OrdinalIgnoreCase) &&
+        uri.IsDefaultPort &&
+        string.IsNullOrEmpty(uri.UserInfo) &&
+        string.IsNullOrEmpty(uri.Fragment) &&
+        string.Equals(uri.AbsolutePath, "/viewinvoice.php", StringComparison.Ordinal) &&
+        uri.Query.StartsWith("?id=", StringComparison.Ordinal))
+    {
+        var rawId = uri.Query.Substring(4);
+        if (ulong.TryParse(rawId, out var invoiceId) && invoiceId > 0 &&
+            string.Equals(uri.Query, $"?id={invoiceId}", StringComparison.Ordinal))
+        {
+            target = uri.AbsoluteUri;
+        }
+    }
+}
+@if (target is not null)
+{
+<script>
+(() => {
+    const target = @Html.Raw(JsonSerializer.Serialize(target));
+    let redirected = false;
+    let observer = null;
+
+    const redirectIfDetected = () => {
+        if (redirected) return true;
+        if (!document.querySelector('#processing, #settled')) return false;
+
+        redirected = true;
+        if (observer) observer.disconnect();
+        window.location.replace(target);
+        return true;
+    };
+
+    if (redirectIfDetected()) return;
+
+    const checkout = document.getElementById('Checkout');
+    if (!checkout) return;
+
+    observer = new MutationObserver(() => redirectIfDetected());
+    observer.observe(checkout, { childList: true, subtree: true });
+})();
+</script>
+}
